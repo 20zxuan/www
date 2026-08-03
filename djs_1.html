@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>倒计时器 - 距离2022年研究生考试还有多少天/已经多少天</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  body {
+    font-family: "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+    background: #ffffff;
+    color: #333;
+    font-size: 14px;
+  }
+
+  /* 顶部导航 */
+  .top-nav {
+    background: #2196e8;
+    color: #fff;
+    height: 46px;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+  }
+  .top-nav .home {
+    display: flex;
+    align-items: center;
+    font-size: 15px;
+    margin-right: 24px;
+  }
+  .top-nav .home .icon {
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    margin-right: 6px;
+    position: relative;
+  }
+  .top-nav .home .icon::after {
+    content: "";
+    position: absolute;
+    left: 8px;
+    top: 3px;
+    width: 2px;
+    height: 7px;
+    background: #fff;
+    transform-origin: bottom;
+    transform: rotate(30deg);
+  }
+  .top-nav .title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-right: 12px;
+  }
+  .top-nav .subtitle {
+    font-size: 12px;
+    opacity: 0.85;
+  }
+
+  /* 状态栏 */
+  .status-bar {
+    background: #eef6fd;
+    text-align: center;
+    padding: 10px;
+    font-size: 13px;
+    color: #555;
+    border-bottom: 1px solid #dce7f0;
+  }
+  .status-bar span {
+    margin: 0 20px;
+  }
+  .status-bar b {
+    color: #333;
+    font-weight: normal;
+  }
+
+  /* 概要行 */
+  .summary-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 14px;
+    font-size: 14px;
+    color: #444;
+    background: #fff;
+  }
+  .summary-bar .label {
+    color: #333;
+  }
+  .summary-bar .highlight {
+    color: #f39c12;
+  }
+  .summary-bar .days-badge {
+    background: #2196e8;
+    color: #fff;
+    padding: 8px 26px;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  /* 主卡片 */
+  .card-wrap {
+    padding: 0 12px 12px;
+  }
+  .count-card {
+    background: url("https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=soft%20blue%20sky%20with%20white%20fluffy%20clouds%2C%20light%20airy%20gradient%2C%20peaceful%20daytime%20sky%20background&image_size=landscape_16_9") no-repeat center top;
+    background-size: cover;
+    background-color: #cfe8fb;
+    text-align: center;
+    padding: 26px 20px 30px;
+    border: 1px solid #d5e7f5;
+  }
+  .count-card h1 {
+    font-size: 30px;
+    color: #1a2a3a;
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+    text-shadow: 0 1px 2px rgba(255,255,255,0.6);
+  }
+  .count-card .info-line {
+    color: #2a3a4a;
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+  .count-card .info-line .date {
+    color: #1565c0;
+  }
+  .count-card .info-line .sep {
+    margin: 0 18px;
+  }
+  .count-card .tip-line {
+    color: #2a3a4a;
+    font-size: 14px;
+    margin: 14px 0 12px;
+  }
+
+  /* 倒计时数字 */
+  .countdown {
+    color: #e53935;
+    font-size: 30px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    margin: 8px 0 18px;
+  }
+  .countdown .num {
+    font-size: 34px;
+    margin: 0 4px;
+  }
+  .countdown .unit {
+    font-size: 22px;
+    margin: 0 14px 0 2px;
+  }
+
+  .count-card .end-line {
+    color: #2a3a4a;
+    font-size: 13px;
+    margin-top: 8px;
+  }
+  .count-card .end-line .val {
+    color: #1565c0;
+    margin-left: 10px;
+  }
+  .count-card .foot-note {
+    margin-top: 18px;
+    color: #7a8a99;
+    font-size: 12px;
+  }
+  .count-card .foot-note a {
+    color: #2196e8;
+    text-decoration: none;
+  }
+
+  /* 视频占位区 */
+  .video-area {
+    height: 190px;
+    background: #f0f0f0;
+    border: 1px solid #e0e0e0;
+    position: relative;
+    margin: 0 12px 14px;
+  }
+  .video-area .play-btn {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 0;
+    height: 0;
+    border-left: 26px solid rgba(255,255,255,0.85);
+    border-top: 16px solid transparent;
+    border-bottom: 16px solid transparent;
+  }
+
+  /* 说明文字 */
+  .note-box {
+    margin: 0 12px 16px;
+    border: 1px solid #e6e6e6;
+    background: #fbfbfb;
+    padding: 12px 14px;
+    font-size: 12px;
+    color: #666;
+    line-height: 1.9;
+  }
+
+  /* 页脚 */
+  .footer {
+    background: #2196e8;
+    color: #fff;
+    text-align: center;
+    padding: 16px;
+    font-size: 12px;
+    line-height: 2;
+  }
+  .footer a {
+    color: #fff;
+    text-decoration: none;
+  }
+</style>
+</head>
+<body>
+
+  <!-- 顶部导航 -->
+  <div class="top-nav">
+    <span class="home"><span class="icon"></span>首页</span>
+    <span class="title">倒计时器</span>
+    <span class="subtitle">距离2022年研究生考试还有多少天/已经多少天</span>
+  </div>
+
+  <!-- 状态栏 -->
+  <div class="status-bar">
+    <span>当前时间：<b id="nowTime">2021-12-23 21:29:24</b></span>
+    <span>当前状态：<b id="status">倒计时进行中</b></span>
+  </div>
+
+  <!-- 概要 -->
+  <div class="summary-bar">
+    <span class="label">研究生考试倒计时</span>
+    <span class="label">距离<span class="highlight">2022年研究生考试</span>还有</span>
+    <span class="days-badge"><span id="badgeDays">2</span>天</span>
+    <span class="label">目标时间：2021-12-25 08:30:00</span>
+  </div>
+
+  <!-- 主卡片 -->
+  <div class="card-wrap">
+    <div class="count-card">
+      <h1>2022年研究生考试</h1>
+      <div class="info-line">
+        <span>2022年研究生考试时间：<span class="date">2021年12月25日</span></span>
+        <span class="sep">星期六</span>
+        <span>农历冬月廿二</span>
+      </div>
+      <div class="tip-line">现在距离2022年研究生考试还有</div>
+
+      <div class="countdown">
+        <span class="num" id="d">1</span><span class="unit">天</span>
+        <span class="num" id="h">11</span><span class="unit">时</span>
+        <span class="num" id="m">0</span><span class="unit">分</span>
+        <span class="num" id="s">35</span><span class="unit">秒</span>
+      </div>
+
+      <div class="end-line">倒计时结束时间：<span class="val">2021-12-25 08:30:00</span></div>
+      <div class="end-line">顺计时开始时间：<span class="val">2021-12-26 17:00:00</span></div>
+
+      <div class="foot-note">
+        当前时间：是指您的设备时间，为了计时更准确，建议将当前时间与<a href="#">北京时间</a>校准
+      </div>
+    </div>
+  </div>
+
+  <!-- 视频占位 -->
+  <div class="video-area">
+    <div class="play-btn"></div>
+  </div>
+
+  <!-- 说明 -->
+  <div class="note-box">
+    2022年考研时间按排在2021年12月25日-26日期间（以教育部通知为准），每天上午8:30-11:30，下午14:00-17:00，超过3小时或有使用画板等特殊要求的考试在12月27日进行。<br>
+    提示：2022年研究生考试时间是2021年12月25日，本页可计算距离2022年研究生考试有多少天或已经过了多少天，并以秒/分数或顺数计时，实时更新。
+  </div>
+
+  <!-- 页脚 -->
+  <div class="footer">
+    倒计时器--记录每一个精彩瞬间<br>
+    Copyright © 2019-2020 <a href="#">Daojishiqi.com</a> 倒计时器 港ICP备1604794号 <a href="#">站长统计</a>
+  </div>
+
+<script>
+  // 目标时间：2021-12-25 08:30:00
+  var target = new Date("2021-12-25T08:30:00").getTime();
+
+  function pad(n){ return n; }
+
+  function update(){
+    var now = new Date();
+
+    // 当前时间显示
+    var y = now.getFullYear();
+    var mo = String(now.getMonth()+1).padStart(2,'0');
+    var da = String(now.getDate()).padStart(2,'0');
+    var hh = String(now.getHours()).padStart(2,'0');
+    var mm = String(now.getMinutes()).padStart(2,'0');
+    var ss = String(now.getSeconds()).padStart(2,'0');
+    document.getElementById('nowTime').textContent =
+      y + "-" + mo + "-" + da + " " + hh + ":" + mm + ":" + ss;
+
+    var diff = target - now.getTime();
+    var statusEl = document.getElementById('status');
+
+    if (diff <= 0) {
+      statusEl.textContent = "已开始（顺计时）";
+      diff = Math.abs(diff);
+    } else {
+      statusEl.textContent = "倒计时进行中";
+    }
+
+    var days = Math.floor(diff / (1000*60*60*24));
+    var hours = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+    var mins = Math.floor((diff % (1000*60*60)) / (1000*60));
+    var secs = Math.floor((diff % (1000*60)) / 1000);
+
+    document.getElementById('d').textContent = days;
+    document.getElementById('h').textContent = hours;
+    document.getElementById('m').textContent = mins;
+    document.getElementById('s').textContent = secs;
+    document.getElementById('badgeDays').textContent = days;
+  }
+
+  update();
+  setInterval(update, 1000);
+</script>
+</body>
+</html>
